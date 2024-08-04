@@ -3,7 +3,7 @@ const { fromPath } = require('pdf2pic');
 const pdf_page = require("pdf-page-counter");
 const fs = require('fs');
 const path = require("path");
-const sharp = require('sharp');
+
 const { exec } = require('child_process');
 const pdf = require('pdf-parse');
 
