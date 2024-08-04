@@ -641,6 +641,7 @@ async function addWaterMark(pdfPaths, outputDir,controls,mode){
 		if(controls.image != undefined && pdfPath.server_filename == controls.image){
 			continue;
 		}
+		console.log(pdfPath.server_filename,__dirname)
 		var inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename)
 		const pdfBytes = fs.readFileSync(inputFilePath);
 		const pdfDoc = await PDFDocument.load(pdfBytes);
