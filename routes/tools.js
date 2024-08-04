@@ -606,7 +606,7 @@ async function addPageNumber(pdfPaths, outputDir,controls) {
 			  const { width, height } = page.getSize();
 			  const fontSize = parseInt(controls.font_size);
 			  const text = `${page_num} / ${pageCount}`;
-			  const textWidth = helveticaFont.widthOfTextAtSize(text, fontSize);
+			  var textWidth = helveticaFont.widthOfTextAtSize(text, fontSize);
 			  const textHeight = helveticaFont.heightAtSize(fontSize);
 			  const { x, y } = getCoordinates(page, text, fontSize,helveticaFont,position,textWidth=textWidth);
 			  page.drawText(text, {
@@ -660,7 +660,7 @@ async function addWaterMark(pdfPaths, outputDir,controls,mode){
 			const pages = pdfDoc.getPages();
 			pages.forEach(page => {
 			  const { width, height } = page.getSize();
-			  const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+			  var textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
 			  const { x, y } = getCoordinates(page, controls.text, fontSize,helveticaFont,position,textWidth=textWidth);
 			  
 				  page.drawText(watermarkText, {
@@ -697,7 +697,7 @@ async function addWaterMark(pdfPaths, outputDir,controls,mode){
 			  
 			  const scaledWidth = imgWidth * scale;
 			  const scaledHeight = imgHeight * scale;
-			  const { x, y } = getCoordinates(page, null, fontSize,null,position,[scaledWidth,scaledHeight]);
+			  const { x, y } = getCoordinates(page, null, fontSize,null,position,[scaledWidth,scaledHeight],textWidth=scaledWidth);
 
 			  page.drawImage(watermarkImage, {
 				x,
