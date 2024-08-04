@@ -768,7 +768,9 @@ async function encryptPDF(inputFileName, outputDir, config) {
     const outputFilePath = path.join(outputDir, inputFileName);
 	const userPassword = config.userPassword.replace(/(["'$`\\])/g,'\\$1');
     const ownerPassword = config.ownerPassword.replace(/(["'$`\\])/g,'\\$1');
-	const gsCommand = `qpdf --encrypt "${userPassword}" "${ownerPassword}" 256 --modify=none -- ${inputFilePath} ${outputFilePath}`;
+	const gsCommand = `gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=${outputFilePath} \
+   -dEncryptionR=3 -dKeyLength=128 -dOwnerPassword=${ownerPassword} \
+   -dUserPassword=${userPassword} -dAllowPrinting ${inputFilePath}`;
 
 	
 	await new Promise((resolve, reject) => {
@@ -795,34 +797,51 @@ async function encryptPDF(inputFileName, outputDir, config) {
 }
 async function decryptPDF(pdfPaths, outputDir) {
   try {
-	if (!fs.existsSync(outputDir)) {
-		fs.mkdirSync(outputDir, { recursive: true });
-	}
-	const decryptSinglePDF = (pdfPath) => {
-      return new Promise((resolve, reject) => {
-        const outputFilePath = path.join(outputDir, pdfPath.filename);
-        const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
-        const gsCommand = `qpdf --decrypt --password=PASSWORD ${inputFilePath} ${outputFilePath}`;
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
 
-        exec(gsCommand, (error, stdout, stderr) => {
+    const decryptSinglePDF = (pdfPath) => {
+      return new Promise((resolve, reject) => {
+        const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
+        const psFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", ".ps"));
+        const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", ".decrypted.pdf"));
+        const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
+        const ps2pdfCommand = `ps2pdf ${psFilePath} ${pdfOutputFilePath}`;
+
+        // Convert PDF to PS
+        exec(pdf2psCommand, (error, stdout, stderr) => {
           if (error) {
-            console.error(`Error decrypting: ${error.message}`);
+            console.error(`Error converting PDF to PS: ${error.message}`);
             return reject(error);
           }
           if (stderr) {
             console.error(`stderr: ${stderr}`);
             return reject(new Error(stderr));
           }
-          console.log(`PDF decrypted: ${stdout}`);
-          resolve(outputFilePath);
+          console.log(`PDF to PS conversion successful: ${stdout}`);
+
+          // Convert PS back to PDF
+          exec(ps2pdfCommand, (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Error converting PS to PDF: ${error.message}`);
+              return reject(error);
+            }
+            if (stderr) {
+              console.error(`stderr: ${stderr}`);
+              return reject(new Error(stderr));
+            }
+            console.log(`PS to PDF conversion successful: ${stdout}`);
+            resolve(pdfOutputFilePath);
+          });
         });
       });
     };
 
     // Process all PDFs in parallel
     const decryptedFiles = await Promise.all(pdfPaths.map(decryptSinglePDF));
-    console.log(`Password removed and saved to ${outputFilePath}`);
-	return outputDir;
+    console.log(`Password removed and saved to: ${decryptedFiles}`);
+    return decryptedFiles;
   } catch (error) {
     console.error(`Error removing password from PDF: ${error.message}`);
   }
