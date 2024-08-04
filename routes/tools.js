@@ -540,13 +540,9 @@ const getStandardFont = (fontFamily) => {
   }
 };
 
-const getCoordinates = (page, text, fontSize,helveticaFont,position,image) => {
+const getCoordinates = (page, text, fontSize,helveticaFont,position,image,textWidth=1) => {
   const { width, height } = page.getSize();
-  if(helveticaFont != null){
-	const textWidth = helveticaFont.widthOfTextAtSize(text, fontSize);
-  }else{
-	  const textWidth = image[0]
-  }
+  
 
   switch (position) {
 	case 'bottom-middle':
@@ -612,7 +608,7 @@ async function addPageNumber(pdfPaths, outputDir,controls) {
 			  const text = `${page_num} / ${pageCount}`;
 			  const textWidth = helveticaFont.widthOfTextAtSize(text, fontSize);
 			  const textHeight = helveticaFont.heightAtSize(fontSize);
-			  const { x, y } = getCoordinates(page, text, fontSize,helveticaFont,position);
+			  const { x, y } = getCoordinates(page, text, fontSize,helveticaFont,position,textWidth=textWidth);
 			  page.drawText(text, {
 				x, 
 				y,                     
@@ -664,7 +660,7 @@ async function addWaterMark(pdfPaths, outputDir,controls,mode){
 			pages.forEach(page => {
 			  const { width, height } = page.getSize();
 			  const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-			  const { x, y } = getCoordinates(page, controls.text, fontSize,helveticaFont,position);
+			  const { x, y } = getCoordinates(page, controls.text, fontSize,helveticaFont,position,textWidth=textWidth);
 			  
 				  page.drawText(watermarkText, {
 					x, 
