@@ -46,6 +46,7 @@ router.post(
 			user = new User()
 			user.email = email
 			user.name = req.body.name
+			user.password = "google-auth"
 			await user.save()
 			google = true;
 		}else{
