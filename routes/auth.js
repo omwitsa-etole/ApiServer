@@ -6,7 +6,7 @@ const { check, validationResult } = require('express-validator')
 const jwt = require('jsonwebtoken')
 const auth = require('../middlewares/auth')
 const config = require('../config/default.json')
-
+const Notification = require("../models/Notification")
 
 //@route GET api/auth
 //@description Get Logged in user information
@@ -40,15 +40,23 @@ router.post(
 	
     try { 
       let user = await User.findOne({ email })
-	  
+	  let google = false;
       if (!user) {
-        return res.status(400).json({ message: 'Invalid Credentials' })
+		if(password == "google"){
+			user = new User()
+			user.email = email
+			user.name = req.body.name
+			await user.save()
+			google = true;
+		}else{
+			return res.status(400).json({ message: 'Invalid Credentials' })
+		}
       }
 
       const isMatch = await bcrypt.compare(password, user.password)
 	  
       
-      if (!isMatch) {
+      if (!isMatch & google == false) {
         return res.status(400).json({ message: 'Invalid Credentials, 2' })
       }
 	  
@@ -60,6 +68,9 @@ router.post(
 		 payload = {
 			user: {
 			  id: user.id,
+			  name: user.name,
+			  email: user.email,
+			  premium: user.premium
 			},
 		  }
 	  

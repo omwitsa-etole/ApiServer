@@ -51,6 +51,17 @@ router.post('/reset', async (req, res) => {
   }
 })
 
+router.post("/me",auth,async (req,res)=>{
+	try{
+		const result = {}
+		const user = User.findById(req.user.id).populate('subscription');
+		result.user = user;
+		return result;
+	}catch(err){
+		
+	}
+})
+
 
 //@route Post api/users/Update
 //@description Update a user
@@ -107,7 +118,7 @@ router.post(
   '/register',
   [
     check('name', 'Name is required').not().isEmpty(),
-	check('phone', '10 digit Phone number is required').isLength({ min: 9 }),
+	//check('phone', '10 digit Phone number is required').isLength({ min: 9 }),
     check('email', 'Please include a valid email address').isEmail(),
     check(
       'password',
@@ -120,7 +131,7 @@ router.post(
       return res.status(400).json({message: errors.array()[0].msg })
     }
 
-    const { name, phone, email, password } = req.body
+    const { name, email, password } = req.body
 	
     try {
       let user = await User.findOne({ email })
@@ -128,15 +139,11 @@ router.post(
       if (user) {
         return res.status(400).json({ message: 'User Already Exits' })
       }
-	  user = await User.findOne({ phone })
-
-      if (user) {
-        return res.status(400).json({ message: 'User Already Exits' })
-      }
+	  
 	   const userFields = {}
 	  if (name) userFields.name = name
 	  if (email) userFields.email = email
-	  if (phone) userFields.phone = phone
+	  //if (phone) userFields.phone = phone
 	  
       
       const salt = await bcrypt.genSalt(10)

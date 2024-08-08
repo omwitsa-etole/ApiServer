@@ -596,7 +596,12 @@ router.post("/process",async(req,res)=>{
       body = body.replace(/\n/g, '');
       body = body.replace('Content-Disposition: form-data;','');
       let data = parseFormData(body);
-      
+      const token = req.query.token;
+	  
+	  if(token && token != null && token != "null" && token != "undefined"){
+		  const decoded = jwt.verify(token, config.jwtSecret);
+		  data.user = decoded.user;
+	  }
 	  data.output_filename =Date.now()+"_"+data.tool
 	  if(!data.output_filename.includes(".pdf")){
 		  data.output_filename = data.output_filename+".pdf"
@@ -611,6 +616,9 @@ router.post("/process",async(req,res)=>{
 		 if(data.tool.includes('edit') || data.tool.includes('sign')){
 		     
 			var processed = new Process({name: data.tool,file:result.output,key:data.task,Id:data.custom_int})
+			if(data.user){
+				processed.user = data.user.id;
+			}
 			await processed.save()
 			if (!responseSent) {
               responseSent = true;
@@ -623,6 +631,9 @@ router.post("/process",async(req,res)=>{
 		
 		if(result && result.output){
 			const processed = new Process({name: data.tool,file:result.output,key:data.task,Id:data.custom_int})
+			if(data.user){
+				processed = data.user.id;
+			}
 			await processed.save()
 			result.key = data.task;
 			result.Id = data.custom_int;	
@@ -751,13 +762,19 @@ router.get("/pdfrender/:id/:timestamp/:page/:dimension",async (req,res)=>{
 
 
 router.post('/upload', upload.single('file'), async (req, res) => {
+  const token = req.query.token;
   const body = req.body;
+  if(token && token != null && token != "null" && token != "undefined"){
+	  const decoded = jwt.verify(token, config.jwtSecret);
+	  body.user = decoded.user;
+  }
+  
   console.log(body)
   let responseSent = false;
   if (req.file) {
     const new_upload = new Uploads({name:req.file.filename,task:body.task});
-    if(req.body.userId){
-      new_upload.user = req.body.userId;
+    if(req.body.user){
+      new_upload.user = req.body.id;
     }
     await new_upload.save()
 	if(req.file.filename.includes(".png")){
@@ -800,13 +817,18 @@ router.post('/upload', upload.single('file'), async (req, res) => {
 });
 
 router.post('/upload/upload-single', upload.single('file'), async (req, res) => {
+  const token = req.query.token;
   const body = req.body;
+  if(token && token != null && token != "null" && token != "undefined"){
+	  const decoded = jwt.verify(token, config.jwtSecret);
+	  body.user = decoded.user;
+  }
   console.log(body)
   let responseSent = false;
   if (req.file) {
     const new_upload = new Uploads({name:req.file.filename,task:body.task});
-    if(req.body.userId){
-      new_upload.user = req.body.userId;
+    if(req.body.user){
+      new_upload.user = req.body.user.id;
     }
     await new_upload.save()
 	if(req.file.filename.includes(".png")){
