@@ -129,7 +129,7 @@ async function splitPDF(pdfPaths, outputDir,pages) {
   for(var pdfPath of pdfPaths){
     pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
     const pdfBytes = fs.readFileSync(pdfPath);
-    const pdf_file = await PDFDocument.load(pdfBytes);
+    const pdf_file = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
     if(pages == "all"){
       for (let i = 0; i < pdf_file.getPageCount(); i++) {
         
@@ -169,7 +169,7 @@ async function removePDF(pdfPaths, outputDir,pages) {
   for(var pdfPath of pdfPaths){
     pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
     const pdfBytes = fs.readFileSync(pdfPath);
-    const pdf_file = await PDFDocument.load(pdfBytes);
+    const pdf_file = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
     
 	  pages = pages.split(",");
 	  for(var page of pages){
@@ -477,7 +477,7 @@ async function rotatePDF(pdfPaths,outputDir){
 		for(var pdfPath of pdfPaths){
 			let Path = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
 			const pdfBytes = fs.readFileSync(Path);
-			const pdfDoc = await PDFDocument.load(pdfBytes);
+			const pdfDoc = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
 			let rotation = parseInt(pdfPath.rotate);
 			if(rotation == NaN || rotation == null){rotation=360;}
 			const pages = pdfDoc.getPages();
@@ -572,7 +572,7 @@ async function addPageNumber(pdfPaths, outputDir,controls) {
     for(var pdfPath of pdfPaths){
 		var inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename)
 		const pdfBytes = fs.readFileSync(inputFilePath);
-		const pdfDoc = await PDFDocument.load(pdfBytes);
+		const pdfDoc = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
 
 		
 		const helveticaFont = await pdfDoc.embedFont(getStandardFont(controls.font_family));
@@ -644,7 +644,7 @@ async function addWaterMark(pdfPaths, outputDir,controls,mode){
 		console.log(pdfPath.server_filename,__dirname)
 		var inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename)
 		const pdfBytes = fs.readFileSync(inputFilePath);
-		const pdfDoc = await PDFDocument.load(pdfBytes);
+		const pdfDoc = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
 		const fontSize = parseInt(controls.font_size);
 		var position = `${controls.vertical_position}-${controls.horizontal_position}`
 		if(mode == 'text'){
@@ -732,7 +732,7 @@ async function addMetadataToPDF(pdfPaths, outputDir) {
     for(var pdfPath of pdfPaths){
 		var inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename)
 		const pdfBytes = fs.readFileSync(inputFilePath);
-		const pdfDoc = await PDFDocument.load(pdfBytes);
+		const pdfDoc = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
 
 		
 		pdfDoc.setTitle('Sample PDF');
