@@ -148,7 +148,7 @@ async function splitPDF(pdfPaths, outputDir, pages) {
           newPdf.addPage(copiedPage);
           splitFiles.push(`page_${i + 1}`);
 		  const newPdfBytes = await newPdf.save();
-		  const outputFilePath = path.join(outputDir, `split_page_${page + 1}.pdf`);
+		  const outputFilePath = path.join(outputDir, `split_page_${i + 1}.pdf`);
 		  fs.writeFileSync(outputFilePath, newPdfBytes);
         }
       } else {
