@@ -157,7 +157,7 @@ async function splitPDF(pdfPaths, outputDir, pages) {
 
     const newPdfBytes = await newPdf.save();
     const outputFilePath = path.join(outputDir, `split_page_${splitFiles.join('_')}.pdf`);
-    await fs.writeFile(outputFilePath, newPdfBytes);
+    fs.writeFileSync(outputFilePath, newPdfBytes);
 
     return outputFilePath;
   } catch (error) {
@@ -195,7 +195,7 @@ async function removePDF(pdfPaths, outputDir,pages) {
 		}
 		const newPdfBytes = await newPdf.save();
 		const outputFilePath = path.join(outputDir, `_page_${split_files.join('_')}.pdf`);
-		await fs.writeFile(outputFilePath, newPdfBytes);
+		fs.writeFileSync(outputFilePath, newPdfBytes);
 		//fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
 		return outputFilePath;
 	}catch (error) {
