@@ -123,75 +123,85 @@ async function compressPDF(pdfPaths, outputFilePath) {
   }
 }
 
-async function splitPDF(pdfPaths, outputDir,pages) {
-  let split_files = [];
-  const newPdf = await PDFDocument.create();
-  for(var pdfPath of pdfPaths){
-    pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
-    const pdfBytes = fs.readFileSync(pdfPath);
-    const pdf_file = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
-    if(pages == "all"){
-      for (let i = 0; i < pdf_file.getPageCount(); i++) {
-        
-        const [copiedPage] = await newPdf.copyPages(pdf_file, [i]);
-        newPdf.addPage(copiedPage);
-  
-       
-        split_files.push(`${outputDir}/page_${i + 1}.pdf`)
-      }
-    }else{
-      pages = pages.split(",");
-      for(var page of pages){
-        page = parseInt(page);
-        for (let i = 0; i < pdf_file.getPageCount(); i++) {
-          if(i==page-1){
-            
-            const [copiedPage] = await newPdf.copyPages(pdf_file, [i]);
+async function splitPDF(pdfPaths, outputDir, pages) {
+  try {
+    let splitFiles = [];
+    const newPdf = await PDFDocument.create();
+    
+    if (pages !== "all") {
+      pages = pages.split(",").map(page => parseInt(page) - 1); // Convert to zero-based index
+    }
+
+    for (const pdfPathObj of pdfPaths) {
+      const pdfPath = path.join(__dirname, '../files/uploads/', pdfPathObj.server_filename);
+      const pdfBytes = await fs.readFile(pdfPath);
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const totalPageCount = pdfDoc.getPageCount();
+
+      if (pages === "all") {
+        for (let i = 0; i < totalPageCount; i++) {
+          const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
+          newPdf.addPage(copiedPage);
+          splitFiles.push(`page_${i + 1}`);
+        }
+      } else {
+        for (const page of pages) {
+          if (page >= 0 && page < totalPageCount) {
+            const [copiedPage] = await newPdf.copyPages(pdfDoc, [page]);
             newPdf.addPage(copiedPage);
-      
-            
-            split_files.push(`${i + 1}`)
+            splitFiles.push(`page_${page + 1}`);
           }
-          
         }
       }
     }
-    
+
+    const newPdfBytes = await newPdf.save();
+    const outputFilePath = path.join(outputDir, `split_page_${splitFiles.join('_')}.pdf`);
+    await fs.writeFile(outputFilePath, newPdfBytes);
+
+    return outputFilePath;
+  } catch (error) {
+    console.error(`Error splitting PDF: ${error.message}\n${error.stack}`);
+    return `Error: ${error.message}`;
   }
-  const newPdfBytes = await newPdf.save();
-  fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
-  return `${outputDir}_page_${split_files.join('_')}.pdf`
 }
 
 async function removePDF(pdfPaths, outputDir,pages) {
-  let split_files = [];
-  const newPdf = await PDFDocument.create();
-  for(var pdfPath of pdfPaths){
-    pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
-    const pdfBytes = fs.readFileSync(pdfPath);
-    const pdf_file = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
-    
-	  pages = pages.split(",");
-	  for(var page of pages){
-		page = parseInt(page);
-		for (let i = 0; i < pdf_file.getPageCount(); i++) {
-		  if(i!=page-1){
-			
-			const [copiedPage] = await newPdf.copyPages(pdf_file, [i]);
-			newPdf.addPage(copiedPage);
-	  
-			
-			split_files.push(`${i + 1}`)
-		  }
+	try{
+		let split_files = [];
+		const newPdf = await PDFDocument.create();
+		for(var pdfPath of pdfPaths){
+		pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
+		const pdfBytes = fs.readFileSync(pdfPath);
+		const pdf_file = await PDFDocument.load(pdfBytes,{ ignoreEncryption: true });
+
+		  pages = pages.split(",");
+		  for(var page of pages){
+			page = parseInt(page);
+			for (let i = 0; i < pdf_file.getPageCount(); i++) {
+			  if(i!=page-1){
+				
+				const [copiedPage] = await newPdf.copyPages(pdf_file, [i]);
+				newPdf.addPage(copiedPage);
 		  
+				
+				split_files.push(`${i + 1}`)
+			  }
+			  
+			}
+		  }
+
+
 		}
-	  }
-    
-    
-  }
-  const newPdfBytes = await newPdf.save();
-  fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
-  return `${outputDir}_page_${split_files.join('_')}.pdf`
+		const newPdfBytes = await newPdf.save();
+		const outputFilePath = path.join(outputDir, `_page_${split_files.join('_')}.pdf`);
+		await fs.writeFile(outputFilePath, newPdfBytes);
+		//fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
+		return outputFilePath;
+	catch (error) {
+		console.error(`Error splitting PDF: ${error.message}`);
+		return null
+	}
 }
 
 
