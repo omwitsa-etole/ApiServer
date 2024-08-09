@@ -129,7 +129,7 @@ async function splitPDF(pdfPaths, outputDir, pages) {
 	if (!fs.existsSync(outputDir)) {
 		fs.mkdirSync(outputDir, { recursive: true });
 	}
-    const newPdf = await PDFDocument.create();
+    
     
     if (pages !== "all") {
       pages = pages.split(",").map(page => parseInt(page) - 1); // Convert to zero-based index
@@ -143,26 +143,31 @@ async function splitPDF(pdfPaths, outputDir, pages) {
 
       if (pages === "all") {
         for (let i = 0; i < totalPageCount; i++) {
+		  const newPdf = await PDFDocument.create();
           const [copiedPage] = await newPdf.copyPages(pdfDoc, [i]);
           newPdf.addPage(copiedPage);
           splitFiles.push(`page_${i + 1}`);
+		  const newPdfBytes = await newPdf.save();
+		  const outputFilePath = path.join(outputDir, `split_page_${page + 1}.pdf`);
+		  fs.writeFileSync(outputFilePath, newPdfBytes);
         }
       } else {
         for (const page of pages) {
           if (page >= 0 && page < totalPageCount) {
+			const newPdf = await PDFDocument.create();
             const [copiedPage] = await newPdf.copyPages(pdfDoc, [page]);
             newPdf.addPage(copiedPage);
             splitFiles.push(`page_${page + 1}`);
-          }
+			const newPdfBytes = await newPdf.save();
+			const outputFilePath = path.join(outputDir, `split_page_${page + 1}.pdf`);
+            fs.writeFileSync(outputFilePath, newPdfBytes);
+		  }
         }
       }
     }
 
-    const newPdfBytes = await newPdf.save();
-    const outputFilePath = path.join(outputDir, `split_page_${splitFiles.join('_')}.pdf`);
-    fs.writeFileSync(outputFilePath, newPdfBytes);
-
-    return outputFilePath;
+    
+    return outputDir;
   } catch (error) {
     console.error(`Error splitting PDF: ${error.message}\n${error.stack}`);
     return `Error: ${error.message}`;
