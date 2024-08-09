@@ -134,7 +134,7 @@ async function splitPDF(pdfPaths, outputDir, pages) {
 
     for (const pdfPathObj of pdfPaths) {
       const pdfPath = path.join(__dirname, '../files/uploads/', pdfPathObj.server_filename);
-      const pdfBytes = await fs.readFile(pdfPath);
+      const pdfBytes = fs.readFileSync(pdfPath);
       const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
       const totalPageCount = pdfDoc.getPageCount();
 
