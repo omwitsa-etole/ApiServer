@@ -126,6 +126,9 @@ async function compressPDF(pdfPaths, outputFilePath) {
 async function splitPDF(pdfPaths, outputDir, pages) {
   try {
     let splitFiles = [];
+	if (!fs.existsSync(outputDir)) {
+		fs.mkdirSync(outputDir, { recursive: true });
+	}
     const newPdf = await PDFDocument.create();
     
     if (pages !== "all") {
@@ -169,6 +172,9 @@ async function splitPDF(pdfPaths, outputDir, pages) {
 async function removePDF(pdfPaths, outputDir,pages) {
 	try{
 		let split_files = [];
+		if (!fs.existsSync(outputDir)) {
+			fs.mkdirSync(outputDir, { recursive: true });
+		}
 		const newPdf = await PDFDocument.create();
 		for(var pdfPath of pdfPaths){
 		pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
@@ -194,7 +200,7 @@ async function removePDF(pdfPaths, outputDir,pages) {
 
 		}
 		const newPdfBytes = await newPdf.save();
-		const outputFilePath = path.join(outputDir, `_page_${split_files.join('_')}.pdf`);
+		const outputFilePath = path.join(outputDir, `_${split_files.join('_')}.pdf`);
 		fs.writeFileSync(outputFilePath, newPdfBytes);
 		//fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
 		return outputFilePath;
