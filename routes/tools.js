@@ -198,7 +198,7 @@ async function removePDF(pdfPaths, outputDir,pages) {
 		await fs.writeFile(outputFilePath, newPdfBytes);
 		//fs.writeFileSync(`${outputDir}_page_${split_files.join('_')}.pdf`, newPdfBytes);
 		return outputFilePath;
-	catch (error) {
+	}catch (error) {
 		console.error(`Error splitting PDF: ${error.message}`);
 		return null
 	}
