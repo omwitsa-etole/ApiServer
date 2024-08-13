@@ -862,10 +862,10 @@ async function decryptPDF(pdfPaths, outputDir) {
     const decryptSinglePDF = (pdfPath) => {
       return new Promise((resolve, reject) => {
         const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
-        const psFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", ".ps"));
+        const psFilePath = path.join(outputDir, pdfPath.sever_filename.replace(".pdf", ".ps"));
         const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", ".decrypted.pdf"));
         const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
-        const ps2pdfCommand = `ps2pdf ${psFilePath} ${pdfOutputFilePath}`;
+        const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
 
         // Convert PDF to PS
         exec(pdf2psCommand, (error, stdout, stderr) => {
