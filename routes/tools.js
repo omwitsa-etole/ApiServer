@@ -899,7 +899,7 @@ async function decryptPDF(pdfPaths, outputDir) {
     // Process all PDFs in parallel
     const decryptedFiles = await Promise.all(pdfPaths.map(decryptSinglePDF));
     console.log(`Password removed and saved to: ${decryptedFiles}`);
-    return pdfOutputFilePath;
+    return decryptedFiles;
   } catch (error) {
     console.error(`Error removing password from PDF: ${error.message}`);
   }
