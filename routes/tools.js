@@ -985,6 +985,9 @@ async function previewPDF(pdfPath, page_no, dimension) {
     return null;
   }
 }
+function escapeShellArg(text) {
+  return `"${text.replace(/(["\s'$`\\])/g,'\\$1')}"`;
+}
 async function convertTextToSpeech(text,outputDir) {
 	try{
 		if (!fs.existsSync(outputDir)) {
@@ -992,7 +995,9 @@ async function convertTextToSpeech(text,outputDir) {
 		}
 		
 		var outputFilePath = path.join(outputDir,"audio.wav");
-		const command = `espeak "${text}" -w ${outputFilePath}`;
+		const escapedText = escapeShellArg(text);
+		const command = `espeak ${escapedText} -w ${outputFilePath}`;
+		//const command = `espeak "${text}" -w ${outputFilePath}`;
     
 		// Execute the command
 		await new Promise((resolve, reject) => {
