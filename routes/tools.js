@@ -883,13 +883,16 @@ async function decryptPDF(pdfPaths, outputDir) {
           exec(ps2pdfCommand, (error, stdout, stderr) => {
             if (error) {
               console.error(`Error converting PS to PDF: ${error.message}`);
+			  fs.unlinkSync(psFilePath);
               return reject(error);
             }
             if (stderr) {
               console.error(`stderr: ${stderr}`);
+			  fs.unlinkSync(psFilePath);
               return reject(new Error(stderr));
             }
             console.log(`PS to PDF conversion successful: ${stdout}`);
+			fs.unlinkSync(psFilePath);
             resolve(pdfOutputFilePath);
           });
         });
@@ -899,7 +902,7 @@ async function decryptPDF(pdfPaths, outputDir) {
     // Process all PDFs in parallel
     const decryptedFiles = await Promise.all(pdfPaths.map(decryptSinglePDF));
     console.log(`Password removed and saved to: ${decryptedFiles}`);
-    return decryptedFiles;
+    return outputDir;
   } catch (error) {
     console.error(`Error removing password from PDF: ${error.message}`);
   }
