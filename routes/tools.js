@@ -990,18 +990,30 @@ async function convertTextToSpeech(text,outputDir) {
 		if (!fs.existsSync(outputDir)) {
 		  fs.mkdirSync(outputDir, { recursive: true });
 		}
-		const request = {
-			input: { text: text },
-			voice: { languageCode: 'en-US', ssmlGender: 'NEUTRAL' },
-			audioConfig: { audioEncoding: 'MP3' },
-		};
+		
+		var outputFilePath = path.join(outputDir,"audio.wav");
+		const command = `espeak "${text}" -w ${outputFilePath}`;
+    
+		// Execute the command
+		await new Promise((resolve, reject) => {
+		  exec(command, (error, stdout, stderr) => {
+			if (error) {
+			  console.error(`Error: ${error.message}`);
+			  reject(error);
+			  return;
+			}
+			if (stderr) {
+			  console.error(`stderr: ${stderr}`);
+			  reject(new Error(stderr));
+			  return;
+			}
+			console.log(`stdout: ${stdout}`);
+			resolve();
+		  });
+		});
 
-		const [response] = await client.synthesizeSpeech(request);
-		const writeFile = util.promisify(fs.writeFile);
-		var outputFilePath = path.join(outputDir,"audio.mp3");
-		await writeFile(outputFilePath, response.audioContent, 'binary');
-		console.log('Audio content written to file:'+outputFilePath);
-		return outputDir
+		console.log('Audio content written to file: ' + outputFilePath);
+		return outputDir;
 	}catch(error){
 		console.log(error);
 		return null;
