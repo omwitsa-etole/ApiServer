@@ -828,7 +828,7 @@ async function encryptPDF(inputFileName, outputDir, config) {
     const outputFilePath = path.join(outputDir, inputFileName);
 	const userPassword = config.userPassword.replace(/(["'$`\\])/g,'\\$1');
     const ownerPassword = config.ownerPassword.replace(/(["'$`\\])/g,'\\$1');
-	const gsCommand = `qpdf --encrypt ${userPassword} ${ownerPassword} 256 --input-file ${inputFilePath} --output ${outputFilePath}`;
+	const gsCommand = `qpdf --encrypt ${userPassword} ${ownerPassword} 256 -- ${inputFilePath} ${outputFilePath}`;
 
 	
 	await new Promise((resolve, reject) => {
