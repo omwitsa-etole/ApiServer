@@ -863,7 +863,7 @@ async function decryptPDF(pdfPaths, outputDir) {
       return new Promise((resolve, reject) => {
         const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
         const psFilePath = path.join(outputDir, pdfPath.server_filename.replace(".pdf", ".ps"));
-        const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", ".decrypted.pdf"));
+        const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", "_decrypted.pdf"));
         const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
         const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
 
@@ -899,7 +899,7 @@ async function decryptPDF(pdfPaths, outputDir) {
     // Process all PDFs in parallel
     const decryptedFiles = await Promise.all(pdfPaths.map(decryptSinglePDF));
     console.log(`Password removed and saved to: ${decryptedFiles}`);
-    return decryptedFiles;
+    return pdfOutputFilePath;
   } catch (error) {
     console.error(`Error removing password from PDF: ${error.message}`);
   }
