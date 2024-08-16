@@ -168,11 +168,12 @@ async function editPDF(pdfPaths,outputFilePath,controls){
 		  if(index+1 == selected){
 			  const { width, height } = page.getSize();
 			  var textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
-			  const { x, y } = getCoordinates(page, watermarkText, fontSize,helveticaFont,position,textWidth=textWidth);
-			  
+			  //const { x, y } = getCoordinates(page, watermarkText, fontSize,helveticaFont,position,textWidth=textWidth);
+			    const x = parseFloat(controls['elements[0][coordinates][x]']);
+				const y = parseFloat(controls['elements[0][coordinates][y]']);
 				  page.drawText(watermarkText, {
-					parseFloat(controls['elements[0][coordinates][x]']), 
-					parseFloat(controls['elements[0][coordinates][y]']),           
+					x,
+					y,					
 					size: fontSize,
 					font: font,
 					color: rgb(r, g, b),       
