@@ -71,7 +71,8 @@ const getCoordinates = (page, text, fontSize,helveticaFont,position,image,textWi
 	case 'top-left':
 	  return { x: 10, y: height - fontSize - 10 };
 	default:
-	  return { x: 10, y: 10 };
+	  //return { x: 10, y: 10 };
+	  return { x: width - textWidth - 10, y: height - fontSize - 10 };
   }
 };
 
