@@ -193,9 +193,9 @@ async function processTool(tool,data){
 		case 'editpdf':
 		    var files= data.files;
 			var new_req = new Requests({tool: 'edit',action: 'edit_pdf'})
-			//var data = parseData(data)
+			var data = parseData(data)
 			console.log("edit=>",data)
-			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename))
+			var result = await ProTool.editPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename),data)
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()

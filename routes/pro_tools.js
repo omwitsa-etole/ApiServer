@@ -91,7 +91,7 @@ async function signPDF(pdfPaths,outputFilePath,controls){
         const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
 		const fontSize = parseInt(controls.font_size ?? 12);
 		var position = `${controls.vertical_position}-${controls.horizontal_position}`
-        const watermarkText = controls['sign_data[name]'];
+        var watermarkText = controls['sign_data[name]'];
 		const helveticaFont = await pdfDoc.embedFont(getStandardFont(controls['sign_data[font]']));
 		const font = await pdfDoc.embedFont(getStandardFont(controls['sign_data[font]']));
 		const [r, g, b] = hexToRgb(controls['sign_data[color]']);
@@ -133,6 +133,70 @@ async function signPDF(pdfPaths,outputFilePath,controls){
   return outputFilePath
 }
 
+async function editPDF(pdfPaths,outputFilePath,controls){
+  const mergedPdf = await PDFDocument.create();
+  //pdfPaths.reverse();
+  for (var pdfPath of pdfPaths) {
+    try{
+        //console.log(pdfPath)
+        if(!pdfPath.server_filename.includes(".pdf")){
+    		pdfPath.server_filename = pdfPath.server_filename+".pdf"
+    	}
+    	pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
+    	
+        const pdfBytes = fs.readFileSync(pdfPath);
+        const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+		const fontSize = parseInt(controls['elements[0][font_size]'] ?? 12);
+		var position = `${controls.vertical_position}-${controls.horizontal_position}`
+        var watermarkText = controls['elements[0][text]'];
+		const helveticaFont = await pdfDoc.embedFont(getStandardFont(controls['elements[0][font_family]']));
+		const font = await pdfDoc.embedFont(getStandardFont(controls['elements[0][font_family]']));
+		const [r, g, b] = hexToRgb(controls['elements[0][font_color]']);
+		var opacity = controls['elements[0][opacity]'];
+		opacity = parseInt(opacity);
+		if (isNaN(opacity)) { opacity = 0; }
+		if (opacity > 1) { opacity = 1; }
+		var rotation = 0;
+		if (isNaN(rotation)) { rotation = 0; }
+		const pages = pdfDoc.getPages();
+		console.log("font-size="+fontSize)
+		var selected = controls['elements[0][pages]']
+		selected = parseInt(selected);
+		if (isNaN(selected)) { selected = 1; }
+		let index = 0;
+		pages.forEach(page => {
+		  if(index+1 == selected){
+			  const { width, height } = page.getSize();
+			  var textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+			  const { x, y } = getCoordinates(page, watermarkText, fontSize,helveticaFont,position,textWidth=textWidth);
+			  
+				  page.drawText(watermarkText, {
+					/*x*/controls['elements[0][coordinates][x]'], 
+					/*y*/controls['elements[0][coordinates][y]'],           
+					size: fontSize,
+					font: font,
+					color: rgb(r, g, b),       
+					opacity: opacity,               
+					rotate: degrees(rotation)            
+				  });
+		  }
+		  index += 1;
+		});
+		const copiedPages = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices());
+        copiedPages.forEach((page) => {
+          mergedPdf.addPage(page);
+        });
+    }catch(error){
+        console.log(error);
+    }
+  }
+
+  const mergedPdfBytes = await mergedPdf.save();
+  fs.writeFileSync(outputFilePath, mergedPdfBytes);
+  return outputFilePath
+}
+
 module.exports = {
 	signPDF,
+	editPDF,
 }
