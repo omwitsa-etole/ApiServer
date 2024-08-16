@@ -607,6 +607,7 @@ router.post("/process",async(req,res)=>{
     req.on('end', async () => {
       body = body.replace(/\n/g, '');
       body = body.replace('Content-Disposition: form-data;','');
+	  console.log("before=>",body)
       let data = parseFormData(body);
       const token = req.query.token;
 	  
