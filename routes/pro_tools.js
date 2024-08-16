@@ -102,6 +102,7 @@ async function signPDF(pdfPaths,outputFilePath,controls){
 		var rotation = 0;
 		if (isNaN(rotation)) { rotation = 0; }
 		const pages = pdfDoc.getPages();
+		console.log("font-size="+fontSize)
 		pages.forEach(page => {
 		  const { width, height } = page.getSize();
 		  var textWidth = font.widthOfTextAtSize(watermarkText, fontSize);

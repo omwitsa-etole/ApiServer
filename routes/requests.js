@@ -624,6 +624,8 @@ router.post("/process",async(req,res)=>{
     data.custom_int = generateRandomInt();
     console.log(data);
 	  if(data.tool){
+		  let new_data = parseFormData(body);
+		  console.log("new",new_data)
 	      let result = await processTool(data.tool,data)
 	       
 		 if(data.tool.includes('edit') || data.tool.includes('sign')){
