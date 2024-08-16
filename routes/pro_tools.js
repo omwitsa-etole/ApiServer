@@ -72,7 +72,7 @@ const getCoordinates = (page, text, fontSize,helveticaFont,position,image,textWi
 	  return { x: 10, y: height - fontSize - 10 };
 	default:
 	  //return { x: 10, y: 10 };
-	  return { x: width - textWidth - 10, y: height - fontSize - 10 };
+	  return { x: width - textWidth , y: height - fontSize - 10 };
   }
 };
 
