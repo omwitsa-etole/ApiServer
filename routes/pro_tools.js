@@ -171,8 +171,8 @@ async function editPDF(pdfPaths,outputFilePath,controls){
 			  const { x, y } = getCoordinates(page, watermarkText, fontSize,helveticaFont,position,textWidth=textWidth);
 			  
 				  page.drawText(watermarkText, {
-					/*x*/controls['elements[0][coordinates][x]'], 
-					/*y*/controls['elements[0][coordinates][y]'],           
+					parseFloat(controls['elements[0][coordinates][x]']), 
+					parseFloat(controls['elements[0][coordinates][y]']),           
 					size: fontSize,
 					font: font,
 					color: rgb(r, g, b),       
