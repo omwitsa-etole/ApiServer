@@ -207,8 +207,8 @@ async function processTool(tool,data){
 	        var files= data.files;
 			var new_req = new Requests({tool: 'sign',action: 'sign_pdf'})
 			//var data = parseData(data)
-			console.log("sign=>",data.files,files)
-			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename))
+			//console.log("sign=>",data.files,files)
+			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename),data)
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()
