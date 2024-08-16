@@ -442,7 +442,7 @@ async function processTool(tool,data){
 			return null
 		case 'unlock':
 			var new_req = new Requests({tool: 'decrypt',action: 'decrypt_pdf'})
-			var result= await Tool.decryptPDF(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf","")))
+			var result= await Tool.decryptPDF(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf","")),data.password ?? data.pwd)
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()

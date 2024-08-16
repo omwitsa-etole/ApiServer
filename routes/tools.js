@@ -853,7 +853,7 @@ async function encryptPDF(inputFileName, outputDir, config) {
 	return null;
   }
 }
-async function decryptPDF(pdfPaths, outputDir) {
+async function decryptPDF(pdfPaths, outputDir,password) {
   try {
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -864,11 +864,11 @@ async function decryptPDF(pdfPaths, outputDir) {
         const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
         const psFilePath = path.join(outputDir, pdfPath.server_filename.replace(".pdf", ".ps"));
         const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", "_decrypted.pdf"));
-        const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
-        const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
-
+        //const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
+        //const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
+		const decryptPdf = `qpdf --decrypt --password=${password} ${inputFilePath} "${pdfOutputFilePath}"`
         // Convert PDF to PS
-        exec(pdf2psCommand, (error, stdout, stderr) => {
+        exec(decryptPdf, (error, stdout, stderr) => {
           if (error) {
             console.error(`Error converting PDF to PS: ${error.message}`);
             return reject(error);
@@ -877,9 +877,9 @@ async function decryptPDF(pdfPaths, outputDir) {
             console.error(`stderr: ${stderr}`);
             return reject(new Error(stderr));
           }
-          console.log(`PDF to PS conversion successful: ${stdout}`);
-
-          // Convert PS back to PDF
+          console.log(`PDF decryption successful: ${stdout}`);
+		  resolve(pdfOutputFilePath);
+          /*// Convert PS back to PDF
           exec(ps2pdfCommand, (error, stdout, stderr) => {
             if (error) {
               console.error(`Error converting PS to PDF: ${error.message}`);
@@ -894,7 +894,7 @@ async function decryptPDF(pdfPaths, outputDir) {
             console.log(`PS to PDF conversion successful: ${stdout}`);
 			fs.unlinkSync(psFilePath);
             resolve(pdfOutputFilePath);
-          });
+          });*/
         });
       });
     };
