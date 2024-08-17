@@ -94,8 +94,10 @@ async function mergePDF(pdfPaths, outputFilePath) {
 			//const text = page.getTextContent(); // Fetch the text content
 			//if (text.items.length > 0) {
 				const [width, height] = pdf_file.getPage(index).getSize();
-				const mergedPage = mergedPdf.addPage([width, height]);
-				mergedPage.drawPage(page);
+				//const mergedPage = mergedPdf.addPage([width, height]);
+				//mergedPage.drawPage(page);
+				console.log([width,height]);
+				mergedPdf.addPage(page);
 			//}
 		});
     }catch(error){
