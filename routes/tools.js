@@ -90,9 +90,14 @@ async function mergePDF(pdfPaths, outputFilePath) {
         const pdfBytes = fs.readFileSync(pdfPath);
         const pdf_file = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
         const copiedPages = await mergedPdf.copyPages(pdf_file, pdf_file.getPageIndices());
-        copiedPages.forEach((page) => {
-          mergedPdf.addPage(page);
-        });
+        copiedPages.forEach((page, index) => {
+			const text = page.getTextContent(); // Fetch the text content
+			//if (text.items.length > 0) {
+				const [width, height] = pdfFile.getPage(index).getSize();
+				const mergedPage = mergedPdf.addPage([width, height]);
+				mergedPage.drawPage(page);
+			//}
+		});
     }catch(error){
         console.log(error);
     }
