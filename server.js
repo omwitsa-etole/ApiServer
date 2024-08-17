@@ -36,17 +36,18 @@ app.use('/api/models/user', require('./routes/models'))
 
 app.use('/api/models/request', require('./routes/requests'))
 app.use('/v1', require('./routes/requests'))
-app.use('/api/models/admin', require('./routes/main'))
+app.use('/v2', require('./routes/main'))
+
 app.use('/api/models/admin2', require('./routes/admin2'))
 app.use('/api/transaction', require('./routes/transactions'))
-
+app.use('/api', require('./routes/main'))
 app.use(express.static(path.join(__dirname, 'files/')));
 
 app.get("/files/uploads/:file_name",(req, res) => {
   res.sendFile(path.join(__dirname,'files/uploads/'+req.params.file_name));
 })
 
-app.get("/thumbnails/<title>",async(req,res)=>{
+app.get("/thumbnails/:title",async(req,res)=>{
 	try{
 		console.log(req.params.title)
 		res.status(200)
@@ -56,7 +57,7 @@ app.get("/thumbnails/<title>",async(req,res)=>{
 	}
 })
 
-app.get("/thumbnails/<title>",async(req,res)=>{
+app.post("/thumbnails/:title",async(req,res)=>{
 	try{
 		console.log(req.params.title)
 		res.status(200)
@@ -78,7 +79,10 @@ app.get("/*",async(req,res)=>{
 
 
 
-const Port = 8080
+
+
+
+const Port = 80
 // Start the Express server and listen on port 8081
 
 app.listen(Port, '0.0.0.0',console.log(`listening on port :${Port}`));
