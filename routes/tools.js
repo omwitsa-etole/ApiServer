@@ -93,7 +93,7 @@ async function mergePDF(pdfPaths, outputFilePath) {
         copiedPages.forEach((page, index) => {
 			//const text = page.getTextContent(); // Fetch the text content
 			//if (text.items.length > 0) {
-				const [width, height] = pdfFile.getPage(index).getSize();
+				const [width, height] = pdf_file.getPage(index).getSize();
 				const mergedPage = mergedPdf.addPage([width, height]);
 				mergedPage.drawPage(page);
 			//}
