@@ -76,32 +76,41 @@ async function convertPDFToWord(pdfPaths, outputPath) {
 
 
 async function mergePDF(pdfPaths, outputFilePath) {
-  const mergedPdf = await PDFDocument.create();
+  //const mergedPdf = await PDFDocument.create();
   //pdfPaths.reverse();
-  
-  for (var pdfPath of pdfPaths) {
-    try{
-        console.log(pdfPath)
-        if(!pdfPath.server_filename.includes(".pdf")){
-    		pdfPath.server_filename = pdfPath.server_filename+".pdf"
-    	}
-    	pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
-    	
-        const pdfBytes = fs.readFileSync(pdfPath);
-        const pdf_file = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-        const copiedPages = await mergedPdf.copyPages(pdf_file, pdf_file.getPageIndices());
-        copiedPages.forEach((page) => {
-			mergedPdf.addPage(page);
-		});
+  try{
+	  const mergedPdf = [];
+	  for (var pdfPath of pdfPaths) {
+		try{
+			console.log(pdfPath)
+			if(!pdfPath.server_filename.includes(".pdf")){
+				pdfPath.server_filename = pdfPath.server_filename+".pdf"
+			}
+			pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
+			
+			mergedPdf.push(pdfPath);
 
-    }catch(error){
-        console.log(error);
-    }
+		}catch(error){
+			console.log(error);
+		}
+	  }
+	  const gsCommand = `qpdf --empty --pages ${mergedPdf.join(' ')} -- ${outputFilePath}`;
+    
+ 
+		const { stdout, stderr } = await execPromise(gsCommand);
+		
+		if (stderr) {
+		  console.error(`stderr: ${stderr}`);
+		  return { success: false, error: stderr };
+		}
+
+	  //const mergedPdfBytes = await mergedPdf.save();
+	  //fs.writeFileSync(outputFilePath, mergedPdfBytes);
+	  return outputFilePath
+  }catch(error){
+	console.error(`Error merging PDF: ${error.message}`);
+    return { success: false, error: error.message };  
   }
-
-  const mergedPdfBytes = await mergedPdf.save();
-  fs.writeFileSync(outputFilePath, mergedPdfBytes);
-  return outputFilePath
 }
 
 async function compressPDF(pdfPaths, outputFilePath) {
