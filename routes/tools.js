@@ -94,6 +94,7 @@ async function mergePDF(pdfPaths, outputFilePath) {
 			console.log(error);
 		}
 	  }
+	  console.log(mergedPdf);
 	  const gsCommand = `qpdf --empty --pages ${mergedPdf.join(' ')} -- ${outputFilePath}`;
     
  
