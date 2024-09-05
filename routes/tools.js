@@ -54,7 +54,7 @@ async function convertPDFToWord(pdfPaths, outputPath) {
 	//let textContent = await extractTextFromPDF(pdfPaths);
     //textContent = textContent.split('\n')
 	console.log(outFile,outDir)
-    const gsCommand = `libreoffice --headless --convert-to docx:"${outFile}" --outdir ${outDir} ${pdfPath}`;
+    const gsCommand = `libreoffice --headless --infilter="writer_pdf_import" --convert-to docx  --outdir ${outDir} ${pdfPath}`;
     console.log(gsCommand)
  
     const { stdout, stderr } = await execPromise(gsCommand);
@@ -65,7 +65,7 @@ async function convertPDFToWord(pdfPaths, outputPath) {
     }
 
     console.log('DOCX file created successfully!');
-    return outputPath;
+    return pdfPath.replace('pdf','docx');
     
   } catch (error) {
     console.error('Error converting to docx:', error);
