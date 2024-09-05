@@ -193,9 +193,9 @@ async function processTool(tool,data){
 		case 'editpdf':
 		    var files= data.files;
 			var new_req = new Requests({tool: 'edit',action: 'edit_pdf'})
-			var data = parseData(data)
+			//var data = parseData(data)
 			console.log("edit=>",data)
-			var result = await ProTool.editPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename),data)
+			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename))
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()
@@ -207,8 +207,8 @@ async function processTool(tool,data){
 	        var files= data.files;
 			var new_req = new Requests({tool: 'sign',action: 'sign_pdf'})
 			//var data = parseData(data)
-			//console.log("sign=>",data.files,files)
-			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename),data)
+			console.log("sign=>",data.files,files)
+			var result = await ProTool.signPDF(files,path.join(__dirname,'../files/uploads/'+data.output_filename))
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()
@@ -284,11 +284,11 @@ async function processTool(tool,data){
 				return null
 			}else{
 				new_req.action = 'pdf_to_word'
-				var result = await Tool.convertPDFToWord(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf",""))+".docx")
+				var result = await Tool.convertPDFToWord(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf","")))
 				if(result != null){
 					new_req.success = true;
 					await new_req.save()
-					return {"sucess":true,output:result.split('uploads')[1].replace(/[\\]/g,""),tool: "docx"}
+					return {"sucess":true,output:result,tool: "docx"}
 				}
 				await new_req.save()
 				return null
@@ -442,7 +442,7 @@ async function processTool(tool,data){
 			return null
 		case 'unlock':
 			var new_req = new Requests({tool: 'decrypt',action: 'decrypt_pdf'})
-			var result= await Tool.decryptPDF(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf","")),data.password ?? data.pwd)
+			var result= await Tool.decryptPDF(data.files,path.join(__dirname,'../files/uploads/'+data.output_filename.replace(".pdf","")))
 			if(result != null){
 				new_req.success = true;
 				await new_req.save()
@@ -607,7 +607,6 @@ router.post("/process",async(req,res)=>{
     req.on('end', async () => {
       body = body.replace(/\n/g, '');
       body = body.replace('Content-Disposition: form-data;','');
-	  console.log("before=>",body)
       let data = parseFormData(body);
       const token = req.query.token;
 	  
@@ -624,8 +623,6 @@ router.post("/process",async(req,res)=>{
     data.custom_int = generateRandomInt();
     console.log(data);
 	  if(data.tool){
-		  let new_data = parseFormData(body);
-		  console.log("new",new_data)
 	      let result = await processTool(data.tool,data)
 	       
 		 if(data.tool.includes('edit') || data.tool.includes('sign')){
