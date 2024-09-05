@@ -55,7 +55,7 @@ async function convertPDFToWord(pdfPaths, outputPath) {
     //textContent = textContent.split('\n')
 	console.log(outFile,outDir)
     const gsCommand = `libreoffice --headless --convert-to docx:"${outFile}" --outdir ${outDir} ${pdfPath}`;
-    
+    console.log(gsCommand)
  
     const { stdout, stderr } = await execPromise(gsCommand);
     
