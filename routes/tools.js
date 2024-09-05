@@ -47,14 +47,21 @@ async function saveHTMLFILE(html,output_file){
 
 async function convertPDFToWord(pdfPaths, outputPath) {
   try {
-    const pdfPath = path.join(__dirname, '../files/uploads/' + pdfPaths[0].server_filename);
-    const pathSegments = outputPath.split("/");
+	const pathSegments = outputPath.split("/");
+	if (!fs.existsSync(outputPath)) {
+		fs.mkdirSync(outputPath, { recursive: true });
+	}
+    
+	const fpl = path.join(__dirname, outputPath,pathSegments[pathSegments.length - 1]+".pdf")
+	const combined = await mergePDF(pdfPaths, fpl)
+    const pdfPath = combined;
+    
 	const outFile = pathSegments[pathSegments.length - 1];
-	const outDir = path.join(__dirname, '../files/uploads/')
+	const outDir = outputPath
 	//let textContent = await extractTextFromPDF(pdfPaths);
     //textContent = textContent.split('\n')
 	//console.log(outFile,outDir)
-    const gsCommand = `libreoffice --headless --infilter="writer_pdf_import" --convert-to doc:"${outFile}" --outdir ${outDir} ${pdfPath}`;
+    const gsCommand = `libreoffice --headless --infilter="writer_pdf_import" --convert-to doc:"${pdfPaths[0].filename.replace('pdf','doc')}" --outdir ${outDir} ${pdfPath}`;
     console.log(gsCommand)
  
     const { stdout, stderr } = await execPromise(gsCommand);
@@ -63,10 +70,10 @@ async function convertPDFToWord(pdfPaths, outputPath) {
       console.error(`converting to docx stderr: ${stderr}`);
       return { success: false, error: stderr };
     }
-
+	fs.unlinkSync(fpl);
     console.log('DOCX file created successfully!');
-    return pdfPath.replace('pdf','doc');
-    
+    //return pdfPath.replace('pdf','doc');
+    return outFile+"/"+pdfPaths[0].filename.replace('pdf','doc');
   } catch (error) {
     console.error('Error converting to docx:', error);
     return null;
