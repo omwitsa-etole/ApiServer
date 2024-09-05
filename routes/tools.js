@@ -48,70 +48,57 @@ async function saveHTMLFILE(html,output_file){
 async function convertPDFToWord(pdfPaths, outputPath) {
   try {
     const pdfPath = path.join(__dirname, '../files/uploads/' + pdfPaths[0].server_filename);
-    let textContent = await extractTextFromPDF(pdfPaths);
-    textContent = textContent.split('\n')
+    const pathSegments = outputPath.split("/");
+	const outFile = pathSegments[pathSegments.length - 1];
+	const outDir = path.join(__dirname, '../files/uploads/')
+	//let textContent = await extractTextFromPDF(pdfPaths);
+    //textContent = textContent.split('\n')
+    const gsCommand = `libreoffice --headless --convert-to docx:"${outFile}" --outdir ${outDir} ${pdfPath}`;
     
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: textContent.map(text => new Paragraph({
-			  children: [new TextRun(text)],
-			})),
-        },
-      ],
-    });
-
-    const buffer = await Packer.toBuffer(doc);
-    fs.writeFileSync(outputPath, buffer);
+ 
+    const { stdout, stderr } = await execPromise(gsCommand);
+    
+    if (stderr) {
+      console.error(`converting to docx stderr: ${stderr}`);
+      return { success: false, error: stderr };
+    }
 
     console.log('DOCX file created successfully!');
     return outputPath;
     
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error converting to docx:', error);
     return null;
   }
 }
 
 
 async function mergePDF(pdfPaths, outputFilePath) {
-  //const mergedPdf = await PDFDocument.create();
+  const mergedPdf = await PDFDocument.create();
   //pdfPaths.reverse();
-  try{
-	  const mergedPdf = [];
-	  for (var pdfPath of pdfPaths) {
-		try{
-			console.log(pdfPath)
-			if(!pdfPath.server_filename.includes(".pdf")){
-				pdfPath.server_filename = pdfPath.server_filename+".pdf"
-			}
-			pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
-			
-			mergedPdf.push(pdfPath);
-
-		}catch(error){
-			console.log(error);
-		}
-	  }
-	  console.log(mergedPdf);
-	  const gsCommand = `qpdf --empty --pages ${mergedPdf.join(' ')} -- ${outputFilePath}`;
-    
- 
-		const { stdout, stderr } = await execPromise(gsCommand);
-		
-		if (stderr) {
-		  console.error(`stderr: ${stderr}`);
-		  return { success: false, error: stderr };
-		}
-
-	  //const mergedPdfBytes = await mergedPdf.save();
-	  //fs.writeFileSync(outputFilePath, mergedPdfBytes);
-	  return outputFilePath
-  }catch(error){
-	console.error(`Error merging PDF: ${error.message}`);
-    return { success: false, error: error.message };  
+  
+  for (var pdfPath of pdfPaths) {
+    try{
+        console.log(pdfPath)
+        if(!pdfPath.server_filename.includes(".pdf")){
+    		pdfPath.server_filename = pdfPath.server_filename+".pdf"
+    	}
+    	pdfPath = path.join(__dirname,'../files/uploads/'+pdfPath.server_filename)
+    	
+        const pdfBytes = fs.readFileSync(pdfPath);
+        const pdf_file = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+        const copiedPages = await mergedPdf.copyPages(pdf_file, pdf_file.getPageIndices());
+        copiedPages.forEach((page) => {
+          mergedPdf.addPage(page);
+        });
+    }catch(error){
+        console.log(error);
+    }
   }
+
+  const mergedPdfBytes = await mergedPdf.save();
+  fs.writeFileSync(outputFilePath, mergedPdfBytes);
+  return outputFilePath
 }
 
 async function compressPDF(pdfPaths, outputFilePath) {
@@ -864,7 +851,7 @@ async function encryptPDF(inputFileName, outputDir, config) {
 	return null;
   }
 }
-async function decryptPDF(pdfPaths, outputDir,password) {
+async function decryptPDF(pdfPaths, outputDir) {
   try {
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -875,11 +862,11 @@ async function decryptPDF(pdfPaths, outputDir,password) {
         const inputFilePath = path.join(__dirname, '../files/uploads/', pdfPath.server_filename);
         const psFilePath = path.join(outputDir, pdfPath.server_filename.replace(".pdf", ".ps"));
         const pdfOutputFilePath = path.join(outputDir, pdfPath.filename.replace(".pdf", "_decrypted.pdf"));
-        //const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
-        //const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
-		const decryptPdf = `qpdf --decrypt --password=${password} ${inputFilePath} "${pdfOutputFilePath}"`
+        const pdf2psCommand = `pdf2ps ${inputFilePath} ${psFilePath}`;
+        const ps2pdfCommand = `ps2pdf ${psFilePath} "${pdfOutputFilePath}"`;
+
         // Convert PDF to PS
-        exec(decryptPdf, (error, stdout, stderr) => {
+        exec(pdf2psCommand, (error, stdout, stderr) => {
           if (error) {
             console.error(`Error converting PDF to PS: ${error.message}`);
             return reject(error);
@@ -888,9 +875,9 @@ async function decryptPDF(pdfPaths, outputDir,password) {
             console.error(`stderr: ${stderr}`);
             return reject(new Error(stderr));
           }
-          console.log(`PDF decryption successful: ${stdout}`);
-		  resolve(pdfOutputFilePath);
-          /*// Convert PS back to PDF
+          console.log(`PDF to PS conversion successful: ${stdout}`);
+
+          // Convert PS back to PDF
           exec(ps2pdfCommand, (error, stdout, stderr) => {
             if (error) {
               console.error(`Error converting PS to PDF: ${error.message}`);
@@ -905,7 +892,7 @@ async function decryptPDF(pdfPaths, outputDir,password) {
             console.log(`PS to PDF conversion successful: ${stdout}`);
 			fs.unlinkSync(psFilePath);
             resolve(pdfOutputFilePath);
-          });*/
+          });
         });
       });
     };
