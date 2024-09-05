@@ -52,10 +52,10 @@ async function convertPDFToWord(pdfPaths, outputPath) {
 		fs.mkdirSync(outputPath, { recursive: true });
 	}
     
-	const fpl = path.join(__dirname, outputPath,pathSegments[pathSegments.length - 1]+".pdf")
+	const fpl = path.join(__dirname,'../files/uploads/'+pathSegments[pathSegments.length - 1]+".pdf")
 	const combined = await mergePDF(pdfPaths, fpl)
     const pdfPath = combined;
-    
+    console.log("merged",combined)
 	const outFile = pathSegments[pathSegments.length - 1];
 	const outDir = outputPath
 	//let textContent = await extractTextFromPDF(pdfPaths);
