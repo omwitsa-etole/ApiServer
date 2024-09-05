@@ -65,7 +65,7 @@ async function convertPDFToWord(pdfPaths, outputPath) {
     }
 
     console.log('DOCX file created successfully!');
-    return outputPath;//pdfPath.replace('pdf','docx');
+    return pdfPath.replace('pdf','doc');
     
   } catch (error) {
     console.error('Error converting to docx:', error);
