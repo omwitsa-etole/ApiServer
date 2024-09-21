@@ -36,6 +36,7 @@ app.use('/api/models/user', require('./routes/models'))
 
 app.use('/api/models/request', require('./routes/requests'))
 app.use('/v1', require('./routes/requests'))
+app.use('/v1', require('./routes/ai'))
 app.use('/v2', require('./routes/main'))
 
 app.use('/api/models/admin2', require('./routes/admin2'))
