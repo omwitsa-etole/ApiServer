@@ -644,7 +644,7 @@ router.post("/process",async(req,res)=>{
 		if(result && result.output){
 			const processed = new Process({name: data.tool,file:result.output,key:data.task,Id:data.custom_int})
 			if(data.user){
-				processed = data.user.id;
+				processed.user = data.user.id;
 			}
 			await processed.save()
 			result.key = data.task;
